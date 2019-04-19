@@ -81,19 +81,14 @@ function addWidgetByAPI(dashId, queryData = {}) {
 }
 
 function dragBy(wrapper, offsetLeft = 0, offsetTop = 0, force = false) {
-  let start;
   return wrapper
-    .then(($el) => {
-      start = $el.offset();
-      return wrapper
-        .trigger('mouseover', { force })
-        .trigger('mousedown', { pageX: start.left, pageY: start.top, which: 1, force })
-        .trigger('mousemove', { pageX: start.left + offsetLeft, pageY: start.top + offsetTop, which: 1, force })
-        .trigger('mouseup', { force });
-    });
+    .trigger('mouseover', { force })
+    .trigger('mousedown', 1, 1, { force })
+    .trigger('mousemove', ++offsetLeft, ++offsetTop, { force }) // eslint-disable-line no-plusplus
+    .trigger('mouseup', { force });
 }
 
-function resizeBy(wrapper, offsetLeft = 0, offsetTop = 0) {
+function resizeBy(wrapper, offsetLeft, offsetTop) {
   return wrapper
     .within(() => {
       dragBy(cy.get(RESIZE_HANDLE_SELECTOR), offsetLeft, offsetTop, true);
@@ -347,7 +342,7 @@ describe('Dashboard', () => {
           resizeBy(cy.get('@textboxEl'), 90)
             .then(() => cy.get('@textboxEl'))
             .should(($el) => {
-              expect($el.width()).to.eq(600); // no change, 600 -> 600
+              expect($el.width()).to.eq(585); // no change, 585 -> 585
             });
         });
 
@@ -355,7 +350,7 @@ describe('Dashboard', () => {
           resizeBy(cy.get('@textboxEl'), 110)
             .then(() => cy.get('@textboxEl'))
             .should(($el) => {
-              expect($el.width()).to.eq(800); // resized by 200, 600 -> 800
+              expect($el.width()).to.eq(785); // resized by 200, 585 -> 785
             });
         });
 
@@ -363,7 +358,7 @@ describe('Dashboard', () => {
           resizeBy(cy.get('@textboxEl'), 400)
             .then(() => cy.get('@textboxEl'))
             .should(($el) => {
-              expect($el.width()).to.eq(1000); // resized by 400, 600 -> 1000
+              expect($el.width()).to.eq(985); // resized by 400, 585 -> 985
             });
         });
       });
@@ -394,7 +389,7 @@ describe('Dashboard', () => {
             .then($el => resizeBy(cy.get('@textboxEl'), -$el.width(), -$el.height())) // resize to 0,0
             .then(() => cy.get('@textboxEl'))
             .should(($el) => {
-              expect($el.width()).to.eq(200); // min textbox width
+              expect($el.width()).to.eq(185); // min textbox width
               expect($el.height()).to.eq(35); // min textbox height
             });
         });
